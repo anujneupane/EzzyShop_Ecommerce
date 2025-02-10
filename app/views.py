@@ -1,10 +1,12 @@
 from django.shortcuts import render,HttpResponseRedirect,redirect
 from django.views import View
-from .models import Product, Customer,Card,OrderPlaced
+from .models import Product, Customer,Cart,OrderPlaced
 from .forms import CustomerRegistrationForm,changepassword,CustomerProfileForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+
 
 class ProductView(View):
     def get(self, request):
@@ -22,8 +24,23 @@ class Product_detail_view(View):
         product = Product.objects.get(pk=pk)
         return render(request, 'app/productdetail.html', {'product':product} )
 
+@login_required
 def add_to_cart(request):
- return render(request, 'app/addtocart.html')
+    user = request.user  
+    product_id = request.GET.get('prod_id')
+
+    if product_id:
+        try:
+            product = Product.objects.get(id=product_id)
+            Cart.objects.create(user=user, product=product)  
+            messages.success(request, "Item added to cart successfully!")
+        except Product.DoesNotExist:
+            messages.error(request, "Product not found.")
+    else:
+        messages.error(request, "Invalid request.")
+
+    return redirect('cart')  # Redirect to the cart page
+
 
 def buy_now(request):
  return render(request, 'app/buynow.html')
