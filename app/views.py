@@ -34,7 +34,21 @@ def add_to_cart(request):
 def show_cart(request):
   user = request.user
   cart = Cart.objects.filter(user = user)
-  return render(request, 'app/showcarts.html',{'carts': cart})
+  amount = 0.0
+  delivary_charge = 100
+  total_amount = 0.0
+  cart_product = [p for p in Cart.objects.all() if p.user==user]
+
+  if cart_product:
+    for p in cart_product:
+      temp = (p.quantity * p.product.discounted_price)
+      amount += temp
+      total_amount = amount + delivary_charge
+
+    return render(request, 'app/showcarts.html',{'carts': cart,'total':total_amount,'amount':amount})
+  
+  else:
+    return render(request, 'app/empty_cart.html')
 
 
 def buy_now(request):
