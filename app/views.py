@@ -7,7 +7,6 @@ from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 
-
 class ProductView(View):
     def get(self, request):
         context = {
@@ -26,20 +25,16 @@ class Product_detail_view(View):
 
 @login_required
 def add_to_cart(request):
-    user = request.user  
-    product_id = request.GET.get('prod_id')
+ user = request.user
+ product_id = request.GET.get('prod_id')
+ product = Product.objects.get(id=product_id)
+ Cart(user=user,product=product).save()
+ return redirect('/cart')
 
-    if product_id:
-        try:
-            product = Product.objects.get(id=product_id)
-            Cart.objects.create(user=user, product=product)  
-            messages.success(request, "Item added to cart successfully!")
-        except Product.DoesNotExist:
-            messages.error(request, "Product not found.")
-    else:
-        messages.error(request, "Invalid request.")
-
-    return redirect('cart')  # Redirect to the cart page
+def show_cart(request):
+  user = request.user
+  cart = Cart.objects.filter(user = user)
+  return render(request, 'app/showcarts.html',{'carts': cart})
 
 
 def buy_now(request):
