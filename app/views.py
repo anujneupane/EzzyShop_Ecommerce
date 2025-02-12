@@ -78,12 +78,48 @@ def plus_cart(request):
     return JsonResponse(data)
 
 
-
-
-
 def minus_cart(request):
   if request.method == 'GET':
-    pass  
+    prod_id = request.GET['prod_id']  
+    c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
+    c.quantity -=1
+    c.save()
+    amount = 0.0
+    delivary_charge = 100
+    user = request.user
+    cart_product = [p for p in Cart.objects.all() if p.user == request.user]
+    for p in cart_product:
+      temp = (p.quantity * p.product.discounted_price)
+      amount += temp
+      total_amount = amount + delivary_charge
+
+    data = {
+      'quantity':c.quantity,
+      'amount':amount,
+      'total_amount': total_amount
+    }
+
+    return JsonResponse(data)
+  
+def remove_cart(request):
+    if request.method == 'GET':
+      prod_id = request.GET['prod_id']  
+      c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
+      c.delete()
+      amount = 0.0
+      delivary_charge = 100
+      user = request.user
+      cart_product = [p for p in Cart.objects.all() if p.user == request.user]
+      for p in cart_product:
+        temp = (p.quantity * p.product.discounted_price)
+        amount += temp
+        total_amount = amount + delivary_charge
+
+      data = {
+      'amount':amount,
+      'total_amount': total_amount
+      }
+      return JsonResponse(data)
 
 
 def buy_now(request):
