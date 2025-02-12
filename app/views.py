@@ -57,7 +57,7 @@ def show_cart(request):
 def plus_cart(request):
   if request.method == 'GET':
     prod_id = request.GET['prod_id']  
-    c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
+    c = Cart.objects.filter(Q(product=prod_id) & Q(user =request.user))
     c.quantity +=1
     c.save()
     amount = 0.0
@@ -81,7 +81,7 @@ def plus_cart(request):
 def minus_cart(request):
   if request.method == 'GET':
     prod_id = request.GET['prod_id']  
-    c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
+    c = Cart.objects.filter(Q(product=prod_id) & Q(user =request.user))
     c.quantity -=1
     c.save()
     amount = 0.0
@@ -104,7 +104,7 @@ def minus_cart(request):
 def remove_cart(request):
     if request.method == 'GET':
       prod_id = request.GET['prod_id']  
-      c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
+      c = Cart.objects.filter(Q(product=prod_id) & Q(user =request.user))
       c.delete()
       amount = 0.0
       delivary_charge = 100
@@ -162,9 +162,6 @@ def bottomwear(request,data = None):
     bottomwears = Product.objects.filter(category = 'BW', brand = data)
   return render (request, 'app/bottomwear.html', {'bottomwears': bottomwears}) 
 
-
-   
-
 class CustomerRegistration(View):
     def get(self,request):
        form = CustomerRegistrationForm()
@@ -176,15 +173,7 @@ class CustomerRegistration(View):
           messages.success(request, 'Congratulations!! Registered Successfully')
           form.save()
         return render(request, 'app/customerregistration.html',{'form':form})  
-
- 
-def userlogout(request):
-   logout(request)
-   return redirect('login')
-
-# # def checkout(request):
-# #  return render(request, 'app/checkout.html')
-
+    
 def passchange(request):  
   if request.user.is_authenticated:
    if request.method == "POST":
@@ -218,3 +207,10 @@ class ProfileView(View):
 def address(request):
  address = Customer.objects.filter(user = request.user) 
  return render(request, 'app/address.html',{'add':address,'active':'btn-primary'})
+
+def userlogout(request):
+   logout(request)
+   return redirect('login')
+
+def checkout(request):
+ return render(request, 'app/checkout.html')

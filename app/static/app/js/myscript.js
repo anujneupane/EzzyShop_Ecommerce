@@ -79,7 +79,8 @@ $('.remove-cart').click(function(){
         success : function(data){
             document.getElementById('amount').innerText = data.amount
             document.getElementById('totalamount').innerText = data.total_amount
-            eml.closest('.row').remove();
+            eml.closest('.row').
+            remove();
         }
     })
 })
