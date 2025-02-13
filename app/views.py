@@ -7,7 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import JsonResponse 
+from django.http import JsonResponse  
+from django.utils.decorators import method_decorator
 
 
 
@@ -179,6 +180,7 @@ def passchange(request):
   else:
      return HttpResponseRedirect('/login/')
   
+@method_decorator(login_required,name='dispatch') ###for class based view method.decorator
 class ProfileView(View):
   def get(self,request):
    form = CustomerProfileForm()
@@ -229,7 +231,8 @@ def paymentdone(request):
   return redirect('orders')  
 
 def orders(request):
- return render(request, 'app/orders.html')
+ order = OrderPlaced.objects.filter(user=request.user)
+ return render(request, 'app/orders.html',{'op':order})
 
 
 

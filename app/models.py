@@ -75,6 +75,9 @@ class OrderPlaced(models.Model):
 
     def __str__(self):
         return str(self.id)   
+    @property
+    def total_cost(self):
+     return self.quantity * self.product.discounted_price
 
   
 
