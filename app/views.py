@@ -39,7 +39,7 @@ def show_cart(request):
   user = request.user
   cart = Cart.objects.filter(user = user)
   amount = 0.0
-  delivary_charge = 100
+  delivary_charge = 100.0
   total_amount = 0.0
   cart_product = [p for p in Cart.objects.all() if p.user==user]
 
@@ -47,7 +47,7 @@ def show_cart(request):
     for p in cart_product:
       temp = (p.quantity * p.product.discounted_price)
       amount += temp
-      total_amount = amount + delivary_charge
+    total_amount = amount + delivary_charge
 
     return render(request, 'app/showcarts.html',{'carts': cart,'total':total_amount,'amount':amount})
   
@@ -57,7 +57,7 @@ def show_cart(request):
 def plus_cart(request):
   if request.method == 'GET':
     prod_id = request.GET['prod_id']  
-    c = Cart.objects.filter(Q(product=prod_id) & Q(user =request.user))
+    c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
     c.quantity +=1
     c.save()
     amount = 0.0
@@ -67,7 +67,7 @@ def plus_cart(request):
     for p in cart_product:
       temp = (p.quantity * p.product.discounted_price)
       amount += temp
-      total_amount = amount + delivary_charge
+    total_amount = amount + delivary_charge
 
     data = {
       'quantity':c.quantity,
@@ -81,7 +81,7 @@ def plus_cart(request):
 def minus_cart(request):
   if request.method == 'GET':
     prod_id = request.GET['prod_id']  
-    c = Cart.objects.filter(Q(product=prod_id) & Q(user =request.user))
+    c = Cart.objects.get(Q(product=prod_id) & Q(user =request.user))
     c.quantity -=1
     c.save()
     amount = 0.0
@@ -91,7 +91,7 @@ def minus_cart(request):
     for p in cart_product:
       temp = (p.quantity * p.product.discounted_price)
       amount += temp
-      total_amount = amount + delivary_charge
+    total_amount = amount + delivary_charge
 
     data = {
       'quantity':c.quantity,
@@ -113,7 +113,7 @@ def remove_cart(request):
       for p in cart_product:
         temp = (p.quantity * p.product.discounted_price)
         amount += temp
-        total_amount = amount + delivary_charge
+      total_amount = amount + delivary_charge
 
       data = {
       'amount':amount,
@@ -124,15 +124,6 @@ def remove_cart(request):
 
 def buy_now(request):
  return render(request, 'app/buynow.html')
-
-
-
-
-
-def orders(request):
- return render(request, 'app/orders.html')
-
-
 
 def mobile(request,data = None):
   if data == None:
@@ -213,4 +204,34 @@ def userlogout(request):
    return redirect('login')
 
 def checkout(request):
- return render(request, 'app/checkout.html')
+  user = request.user
+  address = Customer.objects.filter(user=user)
+  cart_items = Cart.objects.filter(user=user)
+  amount = 0.0
+  delivary_charge = 100
+  cart_product = [p for p in Cart.objects.all() if p.user == request.user]
+  if cart_product:
+    for p in cart_product:
+      temp = (p.quantity * p.product.discounted_price)
+      amount += temp
+    total_amount = amount + delivary_charge
+
+  return render(request, 'app/checkout.html',{'address':address,'total_amount':total_amount,'cart_items':cart_items})
+
+def paymentdone(request):
+  user = request.user
+  custid = request.GET.get('custid')
+  customer = Customer.objects.get(id=custid)
+  cartitm = Cart.objects.filter(user=user)
+  for c in cartitm:
+    OrderPlaced(user=user,customer=customer,product=c.product,quantity =c.quantity).save()
+    c.delete()
+  return redirect('orders')  
+
+def orders(request):
+ return render(request, 'app/orders.html')
+
+
+
+
+

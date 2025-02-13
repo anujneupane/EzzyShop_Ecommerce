@@ -21,8 +21,8 @@ class Customer(models.Model):
     zipcode = models.IntegerField()
     province = models.CharField(choices=Province_choice,max_length=70)
 
-def __str__(self):
-    return str(self.id)
+    def __str__(self):
+        return str(self.id)
 
 category_choice = (
     ('M', 'Mobile'),
@@ -41,16 +41,20 @@ class Product(models.Model):
     category = models.CharField( choices=category_choice,max_length=2)
     product_image = models.ImageField(upload_to = 'producting')
     
-def __str__(self):
-    return str(self.id)
+    def __str__(self):
+        return str(self.id)
 
 class Cart(models.Model):
    user = models.ForeignKey(User, on_delete=models.CASCADE)
    product = models.ForeignKey(Product, on_delete=models.CASCADE)
    quantity = models.PositiveIntegerField(default = 1)
 
-def __str__(self):
+   def __str__(self):
     return str(self.id)
+   
+   @property
+   def total_cost(self):
+    return self.quantity * self.product.discounted_price
 
 
 status_choice = (
@@ -69,8 +73,8 @@ class OrderPlaced(models.Model):
     ordered_date = models.DateTimeField(auto_now_add= True)
     status = models.CharField(max_length=50,choices=status_choice, default = 'Pending')       
 
-def __str__(self):
-    return str(self.id)   
+    def __str__(self):
+        return str(self.id)   
 
   
 
